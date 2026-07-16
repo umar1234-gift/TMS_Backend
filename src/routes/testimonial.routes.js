@@ -1,0 +1,10 @@
+const express = require("express");
+const authMiddleware = require("../middlewares/auth.middleware");
+const testimonialController = require("../controllers/testimonial.controller");
+const router = express.Router();
+router.use(authMiddleware);
+router.get("/", testimonialController.getAll);
+router.post("/", testimonialController.create);
+router.put("/:id", testimonialController.update);
+router.delete("/:id", testimonialController.remove);
+module.exports = router;

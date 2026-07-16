@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model Donation {
+  id         String   @id @default(uuid())
+  amount     Float
+  donorName  String   @map("donor_name")
+  email      String
+  phone      String?
+  category   String   // General, Zakat, Sadaqah, etc.
+  campaignId String?  @map("campaign_id")
+  message    String?
+  status     String   @default("pending") // pending, approved, rejected
+  receiptUrl String?  @map("receipt_url")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  campaign  Campaign? @relation(fields: [campaignId], references: [id])
+
+  @@map("donations")
+}
+
+model Campaign {
+  id           String   @id @default(uuid())
+  title        String
+  slug         String   @unique
+  description  String
+  goalAmount   Float    @map("goal_amount")
+  raisedAmount Float    @default(0) @map("raised_amount")
+  image        String?
+  status       String   @default("draft") // draft, active, completed
+  featured     Boolean  @default(false)
+  startDate    DateTime? @map("start_date")
+  endDate      DateTime? @map("end_date")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  donations Donation[]
+
+  @@map("campaigns")
+}
+
+model Program {
+  id          String   @id @default(uuid())
+  title       String
+  slug        String   @unique
+  description String
+  image       String?
+  category    String   // Education, Medical, Food, Emergency Relief
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("programs")
+}
+
+model Volunteer {
+  id           String   @id @default(uuid())
+  name         String
+  email        String
+  phone        String?
+  skills       String?
+  availability String?
+  message      String?
+  status       String   @default("pending") // pending, approved, rejected
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("volunteers")
+}
+
+model BlogCategory {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  slug      String     @unique
+  posts     BlogPost[]
+
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  content       String
+  excerpt       String?
+  featuredImage String?  @map("featured_image")
+  categoryId    String?  @map("category_id")
+  published     Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  category BlogCategory? @relation(fields: [categoryId], references: [id])
+
+  @@map("blog_posts")
+}
+
+model GalleryAlbum {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  coverImage  String?  @map("cover_image")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  images GalleryImage[]
+
+  @@map("gallery_albums")
+}
+
+model GalleryImage {
+  id        String   @id @default(uuid())
+  albumId   String   @map("album_id")
+  image     String
+  caption   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  album GalleryAlbum @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_images")
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  role      String?
+  quote     String
+  image     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("testimonials")
+}
+
+model Faq {
+  id       String   @id @default(uuid())
+  question String
+  answer   String
+  category String?  // e.g., General, Donation, Volunteering
+  order    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("faqs")
+}
+
+model SiteSetting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+
+  @@map("site_settings")
+}

@@ -33,4 +33,11 @@ app.use(routes);
 // Global error handler
 app.use(errorHandler);
 
+// Catch any error thrown during Express app initialization (e.g. bad
+// middleware configuration) so it surfaces in the logs instead of causing
+// the server to fail silently.
+process.on('uncaughtException', (error) => {
+	console.error('❌ [app.js] Uncaught exception during app initialization/runtime:', error);
+});
+
 module.exports = app;
